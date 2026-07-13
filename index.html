@@ -75,7 +75,6 @@
   .btn-copy.primary:hover { opacity: 0.9; }
   .btn-copy.primary.copied { background: var(--success); border-color: var(--success); color: white; }
 
-  .divider { border: none; border-top: 1px dashed var(--border); margin: 1rem 0; }
 
 
   .error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius); padding: 12px 14px; font-size: 13px; color: #b91c1c; margin-bottom: 1rem; display: none; }
@@ -176,24 +175,9 @@
     </div>
     <div class="result-body">
 
-      <!-- Link rút gọn -->
-      <div class="result-section" id="shortSection" style="display:none">
-        <div class="result-section-label">🔗 Link rút gọn (dùng cái này)</div>
-        <div class="result-url short" id="shortUrl" onclick="copyShort()" title="Nhấn để copy"></div>
-        <div class="utm-tags">
-          <span class="utm-tag">mmp_pid=an_17341270614</span>
-          <span class="utm-tag">utm_source=instagram</span>
-          <span class="utm-tag">utm_medium=stories</span>
-        </div>
-        <div class="btn-row">
-          <button class="btn-copy primary" id="copyShortBtn" onclick="copyShort()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            Copy link rút gọn
-          </button>
-        </div>
-      </div>
+      
 
-      <div class="divider" id="divider" style="display:none"></div>
+      
 
       <!-- Link đầy đủ -->
       <div class="result-section">
@@ -266,14 +250,6 @@
       + '&utm_content=' + IG_HANDLE;
   }
 
-  async function shortenLink(longUrl) {
-    // TinyURL API — không cần key, CORS OK
-    const res = await fetch('https://tinyurl.com/api-create.php?url=' + encodeURIComponent(longUrl));
-    if (!res.ok) throw new Error('TinyURL lỗi');
-    const short = await res.text();
-    if (!short.startsWith('http')) throw new Error('Kết quả không hợp lệ');
-    return short.trim();
-  }
 
   async function generate() {
     const input = document.getElementById('shopeeInput').value.trim();
@@ -302,12 +278,6 @@
 
     // Rút gọn bằng TinyURL
     try {
-      const shortLink = await shortenLink(longLink);
-      document.getElementById('shortUrl').textContent = shortLink;
-      document.getElementById('shortUrl').dataset.url = shortLink;
-      document.getElementById('shortSection').style.display = '';
-      document.getElementById('divider').style.display = '';
-      resetCopyBtn('copyShortBtn', 'Copy link rút gọn');
     } catch(e) {
       // TinyURL thất bại — chỉ hiện link dài
       document.getElementById('longLabel').textContent = '<strong>🔗 Bà con copy link dưới đây rồi mở trong chrom hoặc safari</strong>';
@@ -327,7 +297,6 @@
 
   function resetCopyBtn(id, label) {
     const btn = document.getElementById(id);
-    const isPrimary = id === 'copyShortBtn';
     btn.className = 'btn-copy' + (isPrimary ? ' primary' : '');
     btn.innerHTML = copyIcon() + ' ' + label;
   }
@@ -337,7 +306,6 @@
     if (!url) return;
     navigator.clipboard.writeText(url).then(() => {
       const btn = document.getElementById(btnId);
-      const isPrimary = btnId === 'copyShortBtn';
       btn.className = 'btn-copy copied' + (isPrimary ? ' primary' : '');
       btn.innerHTML = '✓ Đã copy!';
       showToast(toast);
@@ -345,7 +313,6 @@
     });
   }
 
-  function copyShort() { doCopy('shortUrl', 'copyShortBtn', 'Copy link rút gọn', 'Đã copy link rút gọn 🎉'); }
   function copyLong() { doCopy('longUrl', 'copyLongBtn', 'Copy link đầy đủ', 'Đã copy link đầy đủ'); }
 
   function openLink() {
