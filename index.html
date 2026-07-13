@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shopee Link Generator · hihi.2804</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #fff7fa; --surface: #ffffff; --surface-alt: #fff0f7;
+    --border: #ffd6e7; --border-strong: #ffb3cc;
+    --text: #4a2038; --text-sub: #a06080; --text-muted: #d4a0bc;
+    --accent: #ff8fb3; --accent-light: #fff7fa; --accent-border: #ffd0e0;
+    --ig: #e87aaa; --ig-light: #fff7fb; --ig-border: #ffd0e8;
+    --success: #059669; --success-light: #ecfdf5;
+    --radius: 12px; --radius-lg: 20px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10; }
+  .logo { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #ffd6e7, #ffaac8, #f07aaa); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .logo svg { width: 20px; height: 20px; fill: white; }
+  .header-text h1 { font-size: 15px; font-weight: 600; }
+  .header-text p { font-size: 12px; color: var(--text-muted); }
+  .header-badge { margin-left: auto; padding: 4px 10px; background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent-border); border-radius: 100px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+
+  .main { max-width: 520px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+  .hero { text-align: center; margin-bottom: 2rem; }
+  .hero-icon { width: 240px; height: 240px; border-radius: 0; background: none; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; }
+  .hero-icon svg { width: 100px; height: 100px; fill: white; }
+  .hero h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.4px; }
+  .hero p { font-size: 14px; color: var(--text-sub); line-height: 1.6; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
+  .field-label { font-size: 13px; font-weight: 600; color: var(--text-sub); margin-bottom: 8px; display: block; }
+
+  .input-wrap { position: relative; margin-bottom: 6px; }
+  .input-wrap input { width: 100%; padding: 13px 44px 13px 14px; border: 1.5px solid var(--border-strong); border-radius: var(--radius); font-size: 14px; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s, box-shadow 0.15s; -webkit-appearance: none; }
+  .input-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,107,157,0.15); }
+  .input-wrap input::placeholder { color: var(--text-muted); }
+  .input-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border-radius: 50%; background: var(--border-strong); border: none; cursor: pointer; display: none; align-items: center; justify-content: center; color: var(--text-sub); font-size: 12px; }
+  .input-clear.show { display: flex; }
+  .hint { font-size: 12px; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5; }
+
+  .btn-generate { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.15s, transform 0.1s; }
+  .btn-generate:hover { opacity: 0.9; }
+  .btn-generate:active { transform: scale(0.98); }
+  .btn-generate:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+
+  .result-card { background: var(--surface); border: 1.5px solid var(--ig-border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1rem; display: none; }
+  .result-card.show { display: block; }
+  .result-header { padding: 12px 16px; background: var(--ig-light); border-bottom: 1px solid var(--ig-border); display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--ig); }
+  .result-body { padding: 1.25rem; }
+
+  .result-section { margin-bottom: 1rem; }
+  .result-section:last-child { margin-bottom: 0; }
+  .result-section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 6px; }
+
+  .result-url { font-size: 12px; color: var(--text-sub); word-break: break-all; line-height: 1.7; background: var(--surface-alt); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.15s; user-select: all; }
+  .result-url:hover { border-color: var(--ig); }
+  .result-url.short { font-size: 14px; font-weight: 600; color: var(--ig); }
+
+  .utm-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .utm-tag { padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 500; background: var(--ig-light); color: var(--ig); border: 1px solid var(--ig-border); font-family: monospace; }
+
+  .btn-row { display: flex; gap: 8px; }
+  .btn-copy { flex: 1; padding: 11px 16px; border-radius: 8px; border: 1.5px solid var(--ig); background: var(--ig-light); color: var(--ig); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.15s; }
+  .btn-copy:hover { background: #f7d6ef; }
+  .btn-copy.copied { background: var(--success-light); border-color: var(--success); color: var(--success); }
+  .btn-copy.primary { background: var(--ig); color: white; }
+  .btn-copy.primary:hover { opacity: 0.9; }
+  .btn-copy.primary.copied { background: var(--success); border-color: var(--success); color: white; }
+
+  .divider { border: none; border-top: 1px dashed var(--border); margin: 1rem 0; }
+
+
+  .error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius); padding: 12px 14px; font-size: 13px; color: #b91c1c; margin-bottom: 1rem; display: none; }
+  .error-box.show { display: block; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(16px); background: #1a1a18; color: white; padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; white-space: nowrap; z-index: 100; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .footer { text-align: center; padding: 1rem; font-size: 12px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+  </div>
+  <div class="header-text">
+    <h1>hihi.2804 · Link Generator</h1>
+    <p></p>
+  </div>
+  <div class="header-badge">@hihi.2804</div>
+</header>
+
+<main class="main">
+  <div class="hero">
+    <div class="hero-icon" style="background: none; width:180px; height:180px; margin-bottom:0.5rem;">
+      <svg viewBox="1 22 98 80" xmlns="http://www.w3.org/2000/svg" width="180" height="180" style="display:block">
+        <!-- Quai túi -->
+        <path d="M32 48 Q32 28 50 28 Q68 28 68 48" fill="none" stroke="#f07aaa" stroke-width="6" stroke-linecap="round"/>
+        <!-- Thân túi -->
+        <rect x="18" y="46" width="64" height="52" rx="16" fill="#ffb3cc"/>
+        <!-- Sọc trang trí -->
+        <rect x="18" y="62" width="64" height="7" fill="#ffd6e7" opacity="0.8"/>
+        <!-- Khóa túi -->
+        <circle cx="50" cy="73" r="7" fill="#f07aaa"/>
+        <circle cx="50" cy="73" r="3.5" fill="#fff0f7"/>
+        <!-- Tim nhỏ trên túi -->
+        <path d="M44 56 Q44 52 50 55 Q56 52 56 56 Q56 60 50 64 Q44 60 44 56Z" fill="#f07aaa" opacity="0.6"/>
+        <!-- Sparkle trái -->
+        <line x1="8" y1="38" x2="8" y2="52" stroke="#ffaac8" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="1" y1="45" x2="15" y2="45" stroke="#ffaac8" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Sparkle phải -->
+        <line x1="92" y1="32" x2="92" y2="42" stroke="#f07aaa" stroke-width="2" stroke-linecap="round"/>
+        <line x1="87" y1="37" x2="97" y2="37" stroke="#f07aaa" stroke-width="2" stroke-linecap="round"/>
+        <!-- Chấm cute -->
+        <circle cx="86" cy="58" r="4" fill="#ffd6e7"/>
+        <circle cx="14" cy="62" r="3" fill="#ffaac8"/>
+        <circle cx="80" cy="90" r="2.5" fill="#ffd6e7"/>
+      </svg>
+    </div>
+    <h2>Cảm ơn bà con đã ủng hộ<br/>cô gái Nhung xinh đẹp</h2>
+    <p>Bà con hãy copy sản phẩm muốn mua và dán vào input dưới nhé</p>
+  </div>
+
+  <div class="card">
+    <label class="field-label">Link sản phẩm Shopee</label>
+    <div class="input-wrap">
+      <input type="url" id="shopeeInput"
+        placeholder="https://shopee.vn/tên-sản-phẩm-i.123.456"
+        oninput="handleInput(this)"
+        onpaste="setTimeout(()=>handleInput(this),0)"
+      />
+      <button class="input-clear" id="clearBtn" onclick="clearInput()" aria-label="Xoá">✕</button>
+    </div>
+    <p class="hint">Dán link từ trình duyệt web hoặc app Shopee (dạng shopee.vn/...)</p>
+    <button class="btn-generate" id="generateBtn" onclick="generate()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+      Ấn tạo link ở đây nhé
+    </button>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      Link
+    </div>
+    <div class="result-body">
+
+      <!-- Link rút gọn -->
+      <div class="result-section" id="shortSection" style="display:none">
+        <div class="result-section-label">🔗 Link rút gọn (dùng cái này)</div>
+        <div class="result-url short" id="shortUrl" onclick="copyShort()" title="Nhấn để copy"></div>
+        <div class="utm-tags">
+          <span class="utm-tag">mmp_pid=an_17341270614</span>
+          <span class="utm-tag">utm_source=instagram</span>
+          <span class="utm-tag">utm_medium=stories</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn-copy primary" id="copyShortBtn" onclick="copyShort()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy link rút gọn
+          </button>
+        </div>
+      </div>
+
+      <div class="divider" id="divider" style="display:none"></div>
+
+      <!-- Link đầy đủ -->
+      <div class="result-section">
+        <div class="result-section-label" id="longLabel"><strong>🔗 Bà con copy link dưới đây rồi mở trong chrom hoặc safari</strong></div>
+        <div class="result-url" id="longUrl" onclick="copyLong()" title="Nhấn để copy"></div>
+        <div class="btn-row" style="margin-bottom: 8px;">
+          <button class="btn-copy primary" id="openLinkBtn" onclick="openLink()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Ấn vào đây để mở Shopee
+          </button>
+        </div>
+        <div class="btn-row">
+          <button class="btn-copy" id="copyLongBtn" onclick="copyLong()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy link đầy đủ
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+<footer class="footer">hihi.2804 · Shopee Affiliate</footer>
+
+<script>
+  const AFFILIATE_ID = '17341270614';
+  const IG_HANDLE = 'hihi.2804';
+
+  function handleInput(el) {
+    document.getElementById('clearBtn').classList.toggle('show', el.value.trim().length > 0);
+  }
+
+  function clearInput() {
+    document.getElementById('shopeeInput').value = '';
+    document.getElementById('clearBtn').classList.remove('show');
+    document.getElementById('resultCard').classList.remove('show');
+    document.getElementById('errorBox').classList.remove('show');
+    document.getElementById('shopeeInput').focus();
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('errorBox');
+    box.textContent = msg;
+    box.classList.add('show');
+  }
+
+  function buildLongLink(input) {
+    let cleanUrl;
+    try {
+      const u = new URL(input.trim());
+      cleanUrl = 'https://' + u.hostname + u.pathname;
+    } catch {
+      cleanUrl = input.split('?')[0];
+    }
+    return cleanUrl
+      + '?mmp_pid=an_' + AFFILIATE_ID
+      + '&utm_source=instagram'
+      + '&utm_medium=stories'
+      + '&utm_campaign=ig_story'
+      + '&utm_content=' + IG_HANDLE;
+  }
+
+  async function shortenLink(longUrl) {
+    // TinyURL API — không cần key, CORS OK
+    const res = await fetch('https://tinyurl.com/api-create.php?url=' + encodeURIComponent(longUrl));
+    if (!res.ok) throw new Error('TinyURL lỗi');
+    const short = await res.text();
+    if (!short.startsWith('http')) throw new Error('Kết quả không hợp lệ');
+    return short.trim();
+  }
+
+  async function generate() {
+    const input = document.getElementById('shopeeInput').value.trim();
+    document.getElementById('errorBox').classList.remove('show');
+
+    if (!input) { showToast('Vui lòng dán link sản phẩm Shopee'); return; }
+    if (!input.includes('shopee')) { showError('Link không hợp lệ — cần là link shopee.vn'); return; }
+    if (input.includes('s.shopee.vn')) {
+      showError('Cần link sản phẩm dạng shopee.vn/... (mở Shopee trên trình duyệt, copy link từ thanh địa chỉ)');
+      return;
+    }
+
+    // Loading state
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Đang tạo link...';
+
+    const longLink = buildLongLink(input);
+
+    // Hiển thị link dài trước
+    document.getElementById('longUrl').textContent = longLink;
+    document.getElementById('longUrl').dataset.url = longLink;
+    document.getElementById('longLabel').textContent = '🔗 Link đầy đủ (backup)';
+    document.getElementById('resultCard').classList.add('show');
+    resetCopyBtn('copyLongBtn', 'Copy link đầy đủ');
+
+    // Rút gọn bằng TinyURL
+    try {
+      const shortLink = await shortenLink(longLink);
+      document.getElementById('shortUrl').textContent = shortLink;
+      document.getElementById('shortUrl').dataset.url = shortLink;
+      document.getElementById('shortSection').style.display = '';
+      document.getElementById('divider').style.display = '';
+      resetCopyBtn('copyShortBtn', 'Copy link rút gọn');
+    } catch(e) {
+      // TinyURL thất bại — chỉ hiện link dài
+      document.getElementById('longLabel').textContent = '<strong>🔗 Bà con copy link dưới đây rồi mở trong chrom hoặc safari</strong>';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg> Ấn tạo link ở đây nhé';
+
+    setTimeout(() => {
+      document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 80);
+  }
+
+  function copyIcon() {
+    return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  }
+
+  function resetCopyBtn(id, label) {
+    const btn = document.getElementById(id);
+    const isPrimary = id === 'copyShortBtn';
+    btn.className = 'btn-copy' + (isPrimary ? ' primary' : '');
+    btn.innerHTML = copyIcon() + ' ' + label;
+  }
+
+  function doCopy(urlElId, btnId, label, toast) {
+    const url = document.getElementById(urlElId).dataset.url;
+    if (!url) return;
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById(btnId);
+      const isPrimary = btnId === 'copyShortBtn';
+      btn.className = 'btn-copy copied' + (isPrimary ? ' primary' : '');
+      btn.innerHTML = '✓ Đã copy!';
+      showToast(toast);
+      setTimeout(() => resetCopyBtn(btnId, label), 2000);
+    });
+  }
+
+  function copyShort() { doCopy('shortUrl', 'copyShortBtn', 'Copy link rút gọn', 'Đã copy link rút gọn 🎉'); }
+  function copyLong() { doCopy('longUrl', 'copyLongBtn', 'Copy link đầy đủ', 'Đã copy link đầy đủ'); }
+
+  function openLink() {
+    const url = document.getElementById('longUrl').dataset.url;
+    if (!url) return;
+    window.open(url, '_blank');
+  }
+
+  document.getElementById('shopeeInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') generate();
+  });
+</script>
+</body>
+</html>
