@@ -261,13 +261,10 @@
     } catch {
       cleanUrl = productUrl.split('?')[0];
     }
-    // Format chuẩn Shopee Affiliate VN
-    return 'https://s.shopee.vn/an_redir'
-      + '?origin_link=' + encodeURIComponent(cleanUrl)
-      + '&share_channel_code=3'
-      + '&affiliate_id=' + AFFILIATE_ID
-      + '&sub_id=ig_story'
-      + '&deep_and_deferred=1';
+    // Gắn mmp_pid trực tiếp vào link sản phẩm — chuẩn Shopee VN
+    return cleanUrl
+      + '?mmp_pid=an_' + AFFILIATE_ID
+      + '&share_channel_code=3';
   }
 
   function setBtn(text) {
