@@ -26,8 +26,8 @@
 
   .main { max-width: 520px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
 
-  .hero { text-align: center; margin-bottom: 2rem; }
-  .hero-icon { width: 240px; height: 240px; border-radius: 0; background: none; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; }
+  .hero { text-align: center; margin-bottom: 1rem; display: flex; flex-direction: column; align-items: center; }
+  .hero-icon { width: 100px; height: 100px; border-radius: 0; background: none; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; }
   .hero-icon svg { width: 100px; height: 100px; fill: white; }
   .hero h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.4px; }
   .hero p { font-size: 14px; color: var(--text-sub); line-height: 1.6; }
@@ -84,6 +84,26 @@
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(16px); background: #1a1a18; color: white; padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; white-space: nowrap; z-index: 100; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .footer { text-align: center; padding: 1rem; font-size: 12px; color: var(--text-muted); }
+
+  /* Mobile optimized */
+  @media (max-width: 480px) {
+    .header { padding: 0.75rem 1rem; }
+    .header-text h1 { font-size: 13px; }
+    .header-badge { font-size: 10px; padding: 3px 8px; }
+    .main { padding: 1.25rem 1rem 3rem; }
+    .hero { margin-bottom: 1.25rem; }
+    .hero-icon { width: 140px; height: 140px; }
+    .hero h2 { font-size: 20px; }
+    .hero p { font-size: 13px; }
+    .card { padding: 1.1rem; border-radius: 16px; }
+    .input-wrap input { font-size: 16px; padding: 12px 40px 12px 12px; }
+    .btn-generate { padding: 14px; font-size: 15px; border-radius: 12px; }
+    .result-body { padding: 1rem; }
+    .btn-copy { padding: 12px 10px; font-size: 13px; }
+    .utm-tags { display: none; }
+    .result-url { font-size: 11px; }
+    .result-url.short { font-size: 13px; }
+  }
 </style>
 </head>
 <body>
