@@ -153,13 +153,13 @@
     <label class="field-label">Link sản phẩm Shopee</label>
     <div class="input-wrap">
       <input type="url" id="shopeeInput"
-        placeholder="https://shopee.vn/tên-sản-phẩm-i.123.456"
+        placeholder="https://shopee.vn/... hoặc https://vn.shp.ee/..."
         oninput="handleInput(this)"
         onpaste="setTimeout(()=>handleInput(this),0)"
       />
       <button class="input-clear" id="clearBtn" onclick="clearInput()" aria-label="Xoá">✕</button>
     </div>
-    <p class="hint">Dán link từ trình duyệt web hoặc app Shopee (dạng shopee.vn/...)</p>
+    <p class="hint">Dán link sản phẩm Shopee — hỗ trợ cả link web (shopee.vn/...) và link app (vn.shp.ee/...)</p>
     <button class="btn-generate" id="generateBtn" onclick="generate()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
       Ấn tạo link ở đây nhé
@@ -234,13 +234,33 @@
     box.classList.add('show');
   }
 
-  function buildLongLink(input) {
+  const SHORT_DOMAINS = ['s.shopee.vn', 'vn.shp.ee', 'shp.ee'];
+
+  function isShortLink(url) {
+    try {
+      const u = new URL(url.trim());
+      return SHORT_DOMAINS.some(d => u.hostname.includes(d));
+    } catch { return false; }
+  }
+
+  async function expandShortLink(url) {
+    // Dùng allorigins để bypass CORS khi unshorten
+    const api = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+    const res = await fetch(api);
+    const data = await res.json();
+    // allorigins trả về final URL trong status.url
+    if (data.status && data.status.url) return data.status.url;
+    throw new Error('Không unshorten được');
+  }
+
+  function buildLongLink(productUrl) {
     let cleanUrl;
     try {
-      const u = new URL(input.trim());
+      const u = new URL(productUrl.trim());
+      // Bỏ hết params cũ, giữ path
       cleanUrl = 'https://' + u.hostname + u.pathname;
     } catch {
-      cleanUrl = input.split('?')[0];
+      cleanUrl = productUrl.split('?')[0];
     }
     return cleanUrl
       + '?mmp_pid=an_' + AFFILIATE_ID
@@ -250,45 +270,58 @@
       + '&utm_content=' + IG_HANDLE;
   }
 
+  function setBtn(text) {
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = text !== 'done';
+    if (text === 'loading') {
+      btn.innerHTML = '<div class="spinner"></div> Đang tạo link...';
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg> Ấn tạo link ở đây nhé';
+    }
+  }
 
   async function generate() {
     const input = document.getElementById('shopeeInput').value.trim();
     document.getElementById('errorBox').classList.remove('show');
+    document.getElementById('resultCard').classList.remove('show');
 
     if (!input) { showToast('Vui lòng dán link sản phẩm Shopee'); return; }
-    if (!input.includes('shopee')) { showError('Link không hợp lệ — cần là link shopee.vn'); return; }
-    if (input.includes('s.shopee.vn')) {
-      showError('Cần link sản phẩm dạng shopee.vn/... (mở Shopee trên trình duyệt, copy link từ thanh địa chỉ)');
+    if (!input.includes('shopee') && !input.includes('shp.ee')) {
+      showError('Link không hợp lệ — cần là link Shopee');
       return;
     }
 
-    // Loading state
-    const btn = document.getElementById('generateBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<div class="spinner"></div> Đang tạo link...';
+    setBtn('loading');
 
-    const longLink = buildLongLink(input);
-
-    // Hiển thị link dài trước
-    document.getElementById('longUrl').textContent = longLink;
-    document.getElementById('longUrl').dataset.url = longLink;
-    document.getElementById('longLabel').textContent = '🔗 Link đầy đủ (backup)';
-    document.getElementById('resultCard').classList.add('show');
-    resetCopyBtn('copyLongBtn', 'Copy link đầy đủ');
-
-    // Rút gọn bằng TinyURL
     try {
+      let productUrl = input;
+
+      // Nếu là link rút gọn → unshorten trước
+      if (isShortLink(input)) {
+        try {
+          productUrl = await expandShortLink(input);
+        } catch(e) {
+          // Nếu unshorten thất bại, dùng thẳng link rút gọn + gắn affiliate
+          productUrl = input;
+        }
+      }
+
+      const longLink = buildLongLink(productUrl);
+      document.getElementById('longUrl').textContent = longLink;
+      document.getElementById('longUrl').dataset.url = longLink;
+      document.getElementById('resultCard').classList.add('show');
+      resetCopyBtn('copyLongBtn', 'Copy link đầy đủ');
+
+      setTimeout(() => {
+        document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 80);
+
     } catch(e) {
-      // TinyURL thất bại — chỉ hiện link dài
-      document.getElementById('longLabel').textContent = '<strong>🔗 Bà con copy link dưới đây rồi mở trong chrom hoặc safari</strong>';
+      showError('Có lỗi xảy ra, thử lại nhé!');
     }
 
-    btn.disabled = false;
-    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg> Ấn tạo link ở đây nhé';
-
-    setTimeout(() => {
-      document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 80);
+    setBtn('done');
   }
 
   function copyIcon() {
@@ -297,7 +330,7 @@
 
   function resetCopyBtn(id, label) {
     const btn = document.getElementById(id);
-    btn.className = 'btn-copy' + (isPrimary ? ' primary' : '');
+    btn.className = 'btn-copy';
     btn.innerHTML = copyIcon() + ' ' + label;
   }
 
@@ -306,7 +339,7 @@
     if (!url) return;
     navigator.clipboard.writeText(url).then(() => {
       const btn = document.getElementById(btnId);
-      btn.className = 'btn-copy copied' + (isPrimary ? ' primary' : '');
+      btn.className = 'btn-copy copied';
       btn.innerHTML = '✓ Đã copy!';
       showToast(toast);
       setTimeout(() => resetCopyBtn(btnId, label), 2000);
