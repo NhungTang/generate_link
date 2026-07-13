@@ -257,17 +257,17 @@
     let cleanUrl;
     try {
       const u = new URL(productUrl.trim());
-      // Bỏ hết params cũ, giữ path
       cleanUrl = 'https://' + u.hostname + u.pathname;
     } catch {
       cleanUrl = productUrl.split('?')[0];
     }
-    return cleanUrl
-      + '?mmp_pid=an_' + AFFILIATE_ID
-      + '&utm_source=instagram'
-      + '&utm_medium=stories'
-      + '&utm_campaign=ig_story'
-      + '&utm_content=' + IG_HANDLE;
+    // Format chuẩn Shopee Affiliate VN
+    return 'https://s.shopee.vn/an_redir'
+      + '?origin_link=' + encodeURIComponent(cleanUrl)
+      + '&share_channel_code=3'
+      + '&affiliate_id=' + AFFILIATE_ID
+      + '&sub_id=ig_story'
+      + '&deep_and_deferred=1';
   }
 
   function setBtn(text) {
